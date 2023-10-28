@@ -1,2 +1,2 @@
 # Whisker-Wins
-Simple slot machine in js
+Simple terminal based slot machine 
