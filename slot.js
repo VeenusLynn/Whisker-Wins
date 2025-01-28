@@ -53,9 +53,9 @@ const getBet = (balance, lines) => {
     const betAmount = parseFloat(amount);
 
     if (isNaN(betAmount) || betAmount <= 0) {
-      console.log("inavlid bet. Try again");
+      console.log("Invalid bet. Try again");
     } else if (betAmount * lines > balance) {
-      console.log("insufficient balance. Try again.");
+      console.log("Insufficient balance. Try again.");
     } else {
       console.log(
         `You've successfully bet ${betAmount}$ per line\nTotal bet amount : ${
@@ -84,10 +84,77 @@ const spin = () => {
       reels[i].push(selectedSymbol);
     }
   }
-  console.log(reels);
+  return reels;
 };
 
-// let balance = deposit();
-// const lines = getNumberOfLines();
-// const bet = getBet(balance, lines);
-spin();
+const transpose = (reels) => {
+  const transposed = [];
+  for (let i = 0; i < ROWS; i++) {
+    transposed.push([]);
+    for (let j = 0; j < COLS; j++) {
+      transposed[i].push(reels[j][i]);
+    }
+  }
+  return transposed;
+};
+
+const printReels = (reels) => {
+  for (const row of reels) {
+    console.log(row.join(" | "));
+  }
+};
+
+const checkWinnings = (rows, bet, lines) => {
+  let winnings = 0;
+
+  for (let row = 0; row < lines; row++) {
+    const symbols = rows[row];
+    let allSame = true;
+
+    for (const symbol of symbols) {
+      if (symbol !== symbols[0]) {
+        allSame = false;
+        break;
+      }
+    }
+
+    if (allSame) {
+      winnings += bet * SYMBOL_VALUES[symbols[0]];
+    }
+  }
+
+  return winnings;
+};
+
+const game = () => {
+  let balance = deposit();
+
+  while (true) {
+    console.log(`Current balance: ${balance}$`);
+    const lines = getNumberOfLines();
+    const bet = getBet(balance, lines);
+    balance -= bet * lines;
+
+    const reels = spin();
+    const transposedReels = transpose(reels);
+    printReels(transposedReels);
+
+    const winnings = checkWinnings(transposedReels, bet, lines);
+    balance += winnings;
+
+    console.log(`You won: ${winnings}$`);
+    console.log(`Current balance: ${balance}$`);
+
+    if (balance <= 0) {
+      console.log("You're out of money!");
+      break;
+    }
+
+    const playAgain = prompt("Do you want to play again? (y/n): ");
+    if (playAgain.toLowerCase() !== "y") {
+      break;
+    }
+  }
+};
+
+game();
